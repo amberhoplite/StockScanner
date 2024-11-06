@@ -1,0 +1,7 @@
+# Ignore build artifacts and cache
+/build/
+/.vscode/
+
+# Ignore vcpkg installed packages
+/vcpkg_installed/
+/vcpkg/
