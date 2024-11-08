@@ -46,6 +46,16 @@ TEST(StockScannerTests, TestThresholdCheck) {
     std::vector<double> pricesBelowThreshold = {100.0, 102.0};
     EXPECT_FALSE(checkThreshold(pricesBelowThreshold, threshold))
         << "Price movement should be detected as not meeting the threshold.";
+
+    // Example price data where movement is just at the threshold
+    std::vector<double> pricesAtThreshold = {100.0, 105.0};
+    EXPECT_TRUE(checkThreshold(pricesAtThreshold, threshold)) 
+        << "Price movement should meet the threshold exactly.";
+
+    // Example price data where prices do not meet threshold
+    std::vector<double> randomPrices = {100.0, 98.0, 99.0, 97.5, 100.0};
+    EXPECT_FALSE(checkThreshold(randomPrices, threshold)) 
+        << "Random price data should not meet the threshold.";
 }
 
 // Test suite for Sliding Window functionality
@@ -65,6 +75,11 @@ TEST(StockScannerTests, TestSlidingWindow) {
     // Check for an edge case where the window size is larger than the deque
     windowedPrices = applySlidingWindow(prices, 10);
     EXPECT_EQ(windowedPrices.size(), prices.size());  // Window should cover the entire deque
+
+    // Check for an edge case where the window size is 1
+    windowedPrices = applySlidingWindow(prices, 1);
+    EXPECT_EQ(windowedPrices.size(), 1);
+    EXPECT_DOUBLE_EQ(windowedPrices[0], 105.0);
 }
 
 // Test suite for Recursive Momentum Detection
