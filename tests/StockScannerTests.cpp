@@ -3,8 +3,8 @@
 #include <vector>
 #include <deque>
 
-// Test suite for StockScanner functions
-TEST(StockScannerTests, TestLoadStockData) {
+// Test suite for DataLoading functions
+TEST(DataLoadingTests, TestLoadStockData) {
     // Mock data representing stock prices for testing purposes
     std::vector<double> stockPrices = { 100.0, 105.0, 110.0, 115.0 };
 
@@ -14,7 +14,7 @@ TEST(StockScannerTests, TestLoadStockData) {
     EXPECT_DOUBLE_EQ(stockPrices[3], 115.0) << "Last price should be 115.0.";
 }
 // Test suite for calculateAveragePrice function
-TEST(StockScannerTests, TestCalculateAveragePrice) {
+TEST(CalculationTests, TestCalculateAveragePrice) {
     // Test case with multiple price values to calculate average
     std::vector<double> prices = { 100.0, 200.0, 300.0, 400.0 };
     double average = calculateAveragePrice(prices);
@@ -33,7 +33,7 @@ TEST(StockScannerTests, TestCalculateAveragePrice) {
 }
 
 // Test suite for the threshold feature in price movements
-TEST(StockScannerTests, TestThresholdCheck) {
+TEST(ThresholdCheckingTests, TestThresholdCheck) {
     // Define a threshold value for significant price movement
     double threshold = 5.0;
 
@@ -59,7 +59,7 @@ TEST(StockScannerTests, TestThresholdCheck) {
 }
 
 // Test suite for Sliding Window functionality
-TEST(StockScannerTests, TestSlidingWindow) {
+TEST(SlidingWindowTests, TestSlidingWindow) {
     // Define a sample deque with some price data
     std::deque<double> prices = {100.0, 101.0, 102.0, 103.0, 104.0, 105.0};
 
@@ -83,7 +83,7 @@ TEST(StockScannerTests, TestSlidingWindow) {
 }
 
 // Test suite for Recursive Momentum Detection
-TEST(StockScannerTests, TestMomentumDetectionVariousSizes) {
+TEST(MomentumDetectionTests, TestMomentumDetectionVariousSizes) {
     std::deque<double> increasingPrices = {100.0, 105.0, 110.0, 115.0, 120.0};
     std::deque<double> mixedPrices = {100.0, 105.0, 100.0, 105.0, 100.0};
     std::deque<double> decreasingPrices = {120.0, 115.0, 110.0, 105.0, 100.0};
@@ -99,7 +99,7 @@ TEST(StockScannerTests, TestMomentumDetectionVariousSizes) {
 }
 
 // Integration test suite for sliding window as input to momentum detection
-TEST(StockScannerTests, TestSlidingWindowAndMomentumIntegration) {
+TEST(IntegrationTests, TestSlidingWindowAndMomentumIntegration) {
     std::deque<double> prices = {100.0, 105.0, 102.0, 108.0, 110.0, 112.0};
     auto slidingPrices = applySlidingWindow(prices, 4);
 
