@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../src/functions.h"
 #include <vector>
+#include <deque>
 
 // Test suite for StockScanner functions
 TEST(StockScannerTests, TestLoadStockData) {
@@ -45,4 +46,23 @@ TEST(StockScannerTests, TestThresholdCheck) {
     std::vector<double> pricesBelowThreshold = {100.0, 102.0};
     EXPECT_FALSE(checkThreshold(pricesBelowThreshold, threshold))
         << "Price movement should be detected as not meeting the threshold.";
+}
+
+// Test suite for Sliding Window functionality
+TEST(StockScannerTests, TestSlidingWindow) {
+    // Define a sample deque with some price data
+    std::deque<double> prices = {100.0, 101.0, 102.0, 103.0, 104.0, 105.0};
+
+    // Apply a sliding window of size 3
+    std::deque<double> windowedPrices = applySlidingWindow(prices, 3);
+
+    // Check that the window contains exactly 3 elements (the last three prices)
+    EXPECT_EQ(windowedPrices.size(), 3);
+    EXPECT_DOUBLE_EQ(windowedPrices[0], 103.0);
+    EXPECT_DOUBLE_EQ(windowedPrices[1], 104.0);
+    EXPECT_DOUBLE_EQ(windowedPrices[2], 105.0);
+
+    // Check for an edge case where the window size is larger than the deque
+    windowedPrices = applySlidingWindow(prices, 10);
+    EXPECT_EQ(windowedPrices.size(), prices.size());  // Window should cover the entire deque
 }

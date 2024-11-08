@@ -1,4 +1,5 @@
 #include <iostream>
+#include <deque>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -122,4 +123,13 @@ bool checkThreshold(const std::vector<double>& prices, double threshold) {
     // Calculate percentage change between the first and last price
     double percentChange = ((prices.back() - prices.front()) / prices.front()) * 100;
     return std::abs(percentChange) >= threshold;
+}
+
+// Returns a sliding window of the last n elements from a deque
+std::deque<double> applySlidingWindow(const std::deque<double>& prices, size_t windowSize) {
+    if (windowSize >= prices.size()) {
+        return prices;  // Return entire deque if window size exceeds the number of elements
+    }
+
+    return std::deque<double>(prices.end() - windowSize, prices.end());
 }
