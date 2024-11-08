@@ -133,3 +133,21 @@ std::deque<double> applySlidingWindow(const std::deque<double>& prices, size_t w
 
     return std::deque<double>(prices.end() - windowSize, prices.end());
 }
+
+// Recursive function to detect momentum based on price differences
+bool detectMomentum(const std::deque<double>& prices, size_t index, int trendCount) {
+    if (index >= prices.size() - 1) {
+        return trendCount >= static_cast<int>(prices.size()) - 1;  // Positive trend if consistent
+    }
+
+    // Determine if current price is higher or lower than the next one
+    bool isIncreasing = prices[index] < prices[index + 1];
+    if ((isIncreasing && trendCount >= 0) || (!isIncreasing && trendCount <= 0)) {
+        trendCount += isIncreasing ? 1 : -1;
+    } else {
+        trendCount = isIncreasing ? 1 : -1;  // Reset the trend if it switches
+    }
+
+    // Continue recursion
+    return detectMomentum(prices, index + 1, trendCount);
+}

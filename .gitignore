@@ -2,6 +2,9 @@
 /build/
 /.vscode/
 
+# Ignore test artifacts and cache
+/Testing/
+
 # Ignore vcpkg installed packages
 /vcpkg_installed/
 /vcpkg/

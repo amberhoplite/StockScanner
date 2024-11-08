@@ -16,4 +16,6 @@ bool checkThreshold(const std::vector<double>& prices, double threshold);
 
 std::deque<double> applySlidingWindow(const std::deque<double>& prices, size_t windowSize);
 
+bool detectMomentum(const std::deque<double>& prices, size_t index = 0, int trendCount = 0);
+
 #endif
