@@ -30,3 +30,19 @@ TEST(StockScannerTests, TestCalculateAveragePrice) {
     average = calculateAveragePrice(singlePrice);
     EXPECT_NEAR(average, 150.0, 0.001) << "Average of a single-element vector {150} should be 150.";
 }
+
+// Test suite for the threshold feature in price movements
+TEST(StockScannerTests, TestThresholdCheck) {
+    // Define a threshold value for significant price movement
+    double threshold = 5.0;
+
+    // Example price data where movement is above the threshold
+    std::vector<double> pricesAboveThreshold = {100.0, 106.0};
+    EXPECT_TRUE(checkThreshold(pricesAboveThreshold, threshold))
+        << "Price movement should be detected as exceeding the threshold.";
+
+    // Example price data where movement is below the threshold
+    std::vector<double> pricesBelowThreshold = {100.0, 102.0};
+    EXPECT_FALSE(checkThreshold(pricesBelowThreshold, threshold))
+        << "Price movement should be detected as not meeting the threshold.";
+}

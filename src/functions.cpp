@@ -114,3 +114,12 @@ double calculateAveragePrice(const std::vector<double>& prices) {
     double sum = std::accumulate(prices.begin(), prices.end(), 0.0);
     return sum / prices.size();
 }
+
+// Checks if the price change exceeds the threshold percentage
+bool checkThreshold(const std::vector<double>& prices, double threshold) {
+    if (prices.size() < 2) return false;
+
+    // Calculate percentage change between the first and last price
+    double percentChange = ((prices.back() - prices.front()) / prices.front()) * 100;
+    return std::abs(percentChange) >= threshold;
+}
