@@ -22,6 +22,10 @@ add_executable(StockScanner src/main.cpp src/functions.cpp)
 find_package(CURL REQUIRED)
 target_link_libraries(StockScanner PRIVATE CURL::libcurl)
 
+# Link libraries for JSON
+find_package(nlohmann_json CONFIG REQUIRED)
+target_link_libraries(StockScanner PRIVATE nlohmann_json::nlohmann_json)
+
 # Add the tests subdirectory
 add_subdirectory(tests)
 

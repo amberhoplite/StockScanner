@@ -5,3 +5,6 @@
 # Ignore vcpkg installed packages
 /vcpkg_installed/
 /vcpkg/
+
+# Ignore personalized config files
+config.txt

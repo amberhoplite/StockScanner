@@ -5,7 +5,9 @@
 #include <numeric>
 #include <curl/curl.h>
 #include "functions.h"
+#include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
 
 // Callback function for curl to handle data received from HTTP response
 // Appends the response data to the provided string
@@ -25,7 +27,7 @@ void showMenu() {
 
 // Reads the API key from a config file to avoid hardcoding sensitive API keys
 std::string loadApiKeyFromConfig() {
-    std::ifstream configFile("config.txt");
+    std::ifstream configFile("../../config.txt");
     std::string line, apiKey;
     if (configFile.is_open()) {
         while (std::getline(configFile, line)) {
@@ -76,7 +78,20 @@ std::vector<double> loadStockData(const std::string& ticker) {
         if (res != CURLE_OK) {
             std::cerr << "cURL error: " << curl_easy_strerror(res) << "\n";
         } else {
-            std::cout << "Data fetched successfully: \n" << readBuffer << "\n";
+            try {
+                // Parse JSON data
+                auto jsonResponse = json::parse(readBuffer);
+
+                // Navigate to "Time Series (5min)" and extract close prices
+                auto timeSeries = jsonResponse["Time Series (5min)"];
+                for (auto& [timestamp, data] : timeSeries.items()) {
+                    prices.push_back(std::stod(data["4. close"].get<std::string>()));
+                }
+
+                std::cout << "Data parsed successfully: \n";
+        } catch (const json::exception& e) {
+                std::cerr << "JSON parsing error: " << e.what() << "\n";
+            }
         }
 
         curl_easy_cleanup(curl);
