@@ -2,10 +2,6 @@
 find_package(GTest CONFIG REQUIRED)
 find_package(CURL REQUIRED)
 
-# Define the test executable for BasicTest
-add_executable(BasicTest BasicTest.cpp)
-target_link_libraries(BasicTest PRIVATE GTest::gtest GTest::gtest_main)
-
 # Define the test executable for StockScannerTests
 add_executable(StockScannerTests StockScannerTests.cpp ../src/functions.cpp)
 target_include_directories(StockScannerTests PRIVATE ../include)

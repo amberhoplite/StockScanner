@@ -3,6 +3,8 @@
 #include <vector>
 #include <deque>
 
+using namespace StockScanner;
+
 // Test suite for DataLoading functions
 TEST(DataLoadingTests, TestLoadStockData) {
     // Mock data representing stock prices for testing purposes
