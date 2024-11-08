@@ -83,26 +83,27 @@ TEST(StockScannerTests, TestSlidingWindow) {
 }
 
 // Test suite for Recursive Momentum Detection
-TEST(StockScannerTests, TestMomentumDetectionIncreasing) {
-    // Sample data representing increasing prices
-    std::deque<double> prices = {100.0, 105.0, 110.0, 115.0, 120.0};
+TEST(StockScannerTests, TestMomentumDetectionVariousSizes) {
+    std::deque<double> increasingPrices = {100.0, 105.0, 110.0, 115.0, 120.0};
+    std::deque<double> mixedPrices = {100.0, 105.0, 100.0, 105.0, 100.0};
+    std::deque<double> decreasingPrices = {120.0, 115.0, 110.0, 105.0, 100.0};
 
     // Expected momentum should be positive
-    EXPECT_TRUE(detectMomentum(prices)) << "Momentum should be increasing for an upward trend.";
-}
-
-TEST(StockScannerTests, TestMomentumDetectionDecreasing) {
-    // Sample data representing decreasing prices
-    std::deque<double> prices = {120.0, 115.0, 110.0, 105.0, 100.0};
+    EXPECT_TRUE(detectMomentum(increasingPrices)) << "Momentum should be increasing for an upward trend.";
 
     // Expected momentum should be negative
-    EXPECT_FALSE(detectMomentum(prices)) << "Momentum should be decreasing for a downward trend.";
-}
-
-TEST(StockScannerTests, TestMomentumDetectionMixed) {
-    // Sample data with no clear increasing or decreasing trend
-    std::deque<double> prices = {100.0, 105.0, 100.0, 105.0, 100.0};
+    EXPECT_FALSE(detectMomentum(decreasingPrices)) << "Momentum should be decreasing for a downward trend.";
 
     // Expected momentum should be neutral (false in this case)
-    EXPECT_FALSE(detectMomentum(prices)) << "Momentum should be neutral for a mixed trend.";
+    EXPECT_FALSE(detectMomentum(mixedPrices)) << "Momentum should be neutral for a mixed trend.";
+}
+
+// Integration test suite for sliding window as input to momentum detection
+TEST(StockScannerTests, TestSlidingWindowAndMomentumIntegration) {
+    std::deque<double> prices = {100.0, 105.0, 102.0, 108.0, 110.0, 112.0};
+    auto slidingPrices = applySlidingWindow(prices, 4);
+
+    // Check for momentum in the sliding window
+    EXPECT_TRUE(detectMomentum(slidingPrices)) 
+        << "Sliding window prices should indicate a positive momentum.";
 }
