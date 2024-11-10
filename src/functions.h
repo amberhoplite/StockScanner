@@ -5,7 +5,7 @@
 #include <deque>
 
 namespace StockScanner {
-    void showMenu();
+    void showMenu(double threshold, size_t windowSize);
 
     std::vector<double> loadStockData(const std::string& ticker);
 

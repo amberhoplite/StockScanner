@@ -60,6 +60,18 @@ TEST(ThresholdCheckingTests, TestThresholdCheck) {
         << "Random price data should not meet the threshold.";
 }
 
+TEST(ThresholdCheckingTests, TestModifyThreshold) {
+    double threshold = 5.0;
+
+    // Set a new threshold and check if it's applied correctly
+    threshold = 10.0;
+    std::vector<double> prices = {100.0, 111.0};
+    EXPECT_TRUE(checkThreshold(prices, threshold)) << "Price movement should exceed the new threshold of 10%.";
+
+    threshold = 15.0;
+    EXPECT_FALSE(checkThreshold(prices, threshold)) << "Price movement should not exceed the new threshold of 15%.";
+}
+
 // Test suite for Sliding Window functionality
 TEST(SlidingWindowTests, TestSlidingWindow) {
     // Define a sample deque with some price data
@@ -82,6 +94,26 @@ TEST(SlidingWindowTests, TestSlidingWindow) {
     windowedPrices = applySlidingWindow(prices, 1);
     EXPECT_EQ(windowedPrices.size(), 1);
     EXPECT_DOUBLE_EQ(windowedPrices[0], 105.0);
+}
+
+// Test suite for modifying sliding window size
+TEST(SlidingWindowTests, TestModifySlidingWindowSize) {
+    std::deque<double> prices = {100.0, 101.0, 102.0, 103.0, 104.0, 105.0};
+
+    // Apply different sliding window sizes and check results
+    size_t windowSize = 4;
+    std::deque<double> windowedPrices = applySlidingWindow(prices, windowSize);
+    EXPECT_EQ(windowedPrices.size(), 4) << "Sliding window size should be 4.";
+    EXPECT_DOUBLE_EQ(windowedPrices[0], 102.0) << "First element of window should be 102.0.";
+
+    windowSize = 1;
+    windowedPrices = applySlidingWindow(prices, windowSize);
+    EXPECT_EQ(windowedPrices.size(), 1) << "Sliding window size should be 1.";
+    EXPECT_DOUBLE_EQ(windowedPrices[0], 105.0) << "Only element of window should be 105.0.";
+
+    windowSize = 10;
+    windowedPrices = applySlidingWindow(prices, windowSize);
+    EXPECT_EQ(windowedPrices.size(), prices.size()) << "Sliding window size larger than deque should cover all elements.";
 }
 
 // Test suite for Recursive Momentum Detection
@@ -108,4 +140,16 @@ TEST(IntegrationTests, TestSlidingWindowAndMomentumIntegration) {
     // Check for momentum in the sliding window
     EXPECT_TRUE(detectMomentum(slidingPrices)) 
         << "Sliding window prices should indicate a positive momentum.";
+}
+
+// Additional integration test for threshold check after modification
+TEST(IntegrationTests, TestModifiedThresholdAndMomentumIntegration) {
+    std::vector<double> prices = {100.0, 120.0, 140.0, 160.0, 180.0};
+    double threshold = 10.0;
+
+    // Check if modifying threshold impacts the momentum check
+    EXPECT_TRUE(checkThreshold(prices, threshold)) << "Price movement should exceed modified threshold of 10%.";
+
+    threshold = 85.0;
+    EXPECT_FALSE(checkThreshold(prices, threshold)) << "Price movement should not exceed a modified threshold of 50%.";
 }

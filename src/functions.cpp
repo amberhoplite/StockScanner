@@ -20,11 +20,16 @@ namespace StockScanner {
     }
 
     // Displays the menu options
-    void showMenu() {
+    void showMenu(double threshold, size_t windowSize) {
         std::cout << "Menu:\n";
         std::cout << "1. Get Stock Ticker Data\n";
         std::cout << "2. Calculate Average Stock Price\n";
-        std::cout << "3. Exit\n";
+        std::cout << "3. Check Threshold\n";
+        std::cout << "4. Modify Threshold Setting (Current: " << threshold << "%)\n";
+        std::cout << "5. Apply Sliding Window\n";
+        std::cout << "6. Modify Sliding Window Size (Current: " << windowSize << ")\n";
+        std::cout << "7. Detect Momentum\n";
+        std::cout << "8. Exit\n";
         std::cout << "Select an option: ";
     }
 
@@ -64,9 +69,8 @@ namespace StockScanner {
             }
 
             // Construct API request URL
-            std::string url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY"
+            std::string url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY"
                             "&symbol=" + ticker +
-                            "&interval=5min"
                             "&apikey=" + apiKey;
 
             // Set curl options for URL and callback function
@@ -86,7 +90,7 @@ namespace StockScanner {
                     auto jsonResponse = json::parse(readBuffer);
 
                     // Navigate to "Time Series (5min)" and extract close prices
-                    auto timeSeries = jsonResponse["Time Series (5min)"];
+                    auto timeSeries = jsonResponse["Time Series (Daily)"];
                     for (auto& [timestamp, data] : timeSeries.items()) {
                         prices.push_back(std::stod(data["4. close"].get<std::string>()));
                     }
