@@ -26,6 +26,10 @@ target_link_libraries(StockScanner PRIVATE CURL::libcurl)
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(StockScanner PRIVATE nlohmann_json::nlohmann_json)
 
+# Link libraries for SQLite (unofficial version)
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
+target_link_libraries(StockScanner PRIVATE unofficial::sqlite3::sqlite3)
+
 # Add the tests subdirectory
 add_subdirectory(tests)
 

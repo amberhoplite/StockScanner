@@ -2,6 +2,7 @@
 #include "../src/functions.h"
 #include <vector>
 #include <deque>
+#include <sqlite3.h>
 
 using namespace StockScanner;
 
@@ -152,4 +153,45 @@ TEST(IntegrationTests, TestModifiedThresholdAndMomentumIntegration) {
 
     threshold = 85.0;
     EXPECT_FALSE(checkThreshold(prices, threshold)) << "Price movement should not exceed a modified threshold of 50%.";
+}
+
+// SQLite setup and basic database operations test
+TEST(SQLiteTests, TestSQLiteConnection) {
+    sqlite3* db;
+    char* errMsg = 0;
+    int rc;
+
+    // Open a database connection
+    rc = sqlite3_open("test.db", &db);
+    ASSERT_EQ(rc, SQLITE_OK) << "Failed to open the SQLite database: " << sqlite3_errmsg(db);
+
+    // Create a simple table
+    const char* sql = "CREATE TABLE IF NOT EXISTS test_table("
+                      "ID INT PRIMARY KEY NOT NULL,"
+                      "NAME TEXT NOT NULL);";
+
+    rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
+    ASSERT_EQ(rc, SQLITE_OK) << "Failed to create table: " << (errMsg ? errMsg : "Unknown error");
+
+    // Insert a record
+    sql = "INSERT INTO test_table (ID, NAME) VALUES (1, 'TestName');";
+    rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
+    ASSERT_EQ(rc, SQLITE_OK) << "Failed to insert record: " << (errMsg ? errMsg : "Unknown error");
+
+    // Retrieve the data to verify insertion
+    const char* query = "SELECT * FROM test_table WHERE ID = 1;";
+    sqlite3_stmt* stmt;
+
+    rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    ASSERT_EQ(rc, SQLITE_OK) << "Failed to prepare select statement: " << sqlite3_errmsg(db);
+
+    rc = sqlite3_step(stmt);
+    ASSERT_EQ(rc, SQLITE_ROW) << "No rows returned or step failed.";
+
+    ASSERT_EQ(sqlite3_column_int(stmt, 0), 1) << "Unexpected ID value retrieved.";
+    ASSERT_STREQ(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)), "TestName") << "Unexpected NAME value retrieved.";
+
+    // Clean up
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
 }

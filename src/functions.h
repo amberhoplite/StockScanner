@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <deque>
+#include <sqlite3.h>
 
 namespace StockScanner {
     void showMenu(double threshold, size_t windowSize);
