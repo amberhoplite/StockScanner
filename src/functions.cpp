@@ -6,11 +6,20 @@
 #include <numeric>
 #include <curl/curl.h>
 #include "functions.h"
+#include "database_utils.h"
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
 namespace StockScanner {
+
+    // Define a map to store the timeframe-related information
+    const std::unordered_map<std::string, TimeframeInfo> timeframeMap = {
+        {"5min", {"TIME_SERIES_INTRADAY&interval=5min", "Time Series (5min)"}},
+        {"15min", {"TIME_SERIES_INTRADAY&interval=15min", "Time Series (15min)"}},
+        {"daily", {"TIME_SERIES_DAILY", "Time Series (Daily)"}},
+        {"hourly", {"TIME_SERIES_INTRADAY&interval=60min", "Time Series (60min)"}}
+    };
 
     // Callback function for curl to handle data received from HTTP response
     // Appends the response data to the provided string
@@ -29,7 +38,8 @@ namespace StockScanner {
         std::cout << "5. Apply Sliding Window\n";
         std::cout << "6. Modify Sliding Window Size (Current: " << windowSize << ")\n";
         std::cout << "7. Detect Momentum\n";
-        std::cout << "8. Exit\n";
+        std::cout << "8. Change timeframe\n";
+        std::cout << "9. Exit\n";
         std::cout << "Select an option: ";
     }
 
@@ -50,7 +60,22 @@ namespace StockScanner {
     }
 
     // Fetches stock price data from an API given a ticker symbol
-    std::vector<double> loadStockData(const std::string& ticker) {
+    std::vector<double> loadStockData(const std::string& ticker, const std::string& timeframe) {
+
+        // Check if timeframe is supported
+        auto it = timeframeMap.find(timeframe);
+        if (it == timeframeMap.end()) {
+            std::cerr << "Unsupported timeframe: " << timeframe << "\n";
+            return {};
+        }
+
+        const TimeframeInfo& tfInfo = it->second;
+
+        if (checkStockDataExists(ticker)) {
+            std::cout << "Stock data already exists in the database.\n";
+            return getStockDataFromDatabase(ticker);  // Retrieve data from the database
+        }
+
     #ifndef UNIT_TESTING
         std::string readBuffer;     // Buffer to store the response data
         std::vector<double> prices; // Vector to store parsed price data
@@ -69,9 +94,9 @@ namespace StockScanner {
             }
 
             // Construct API request URL
-            std::string url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY"
-                            "&symbol=" + ticker +
-                            "&apikey=" + apiKey;
+            std::string url = "https://www.alphavantage.co/query?function=" + tfInfo.apiFunction +
+                              "&symbol=" + ticker +
+                              "&apikey=" + apiKey;
 
             // Set curl options for URL and callback function
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -88,11 +113,22 @@ namespace StockScanner {
                 try {
                     // Parse JSON data
                     auto jsonResponse = json::parse(readBuffer);
+                    auto timeSeries = jsonResponse[tfInfo.jsonKey];
 
-                    // Navigate to "Time Series (5min)" and extract close prices
-                    auto timeSeries = jsonResponse["Time Series (Daily)"];
-                    for (auto& [timestamp, data] : timeSeries.items()) {
-                        prices.push_back(std::stod(data["4. close"].get<std::string>()));
+                    // Prepare the data for insertion into the database
+                    std::vector<std::pair<std::string, double>> dataToInsert;
+
+                    for (auto& [datetime, data] : timeSeries.items()) {
+                        double closePrice = std::stod(data["4. close"].get<std::string>());
+                        prices.push_back(closePrice);
+
+                        // Collect datetime and close price for database insertion
+                        dataToInsert.push_back({datetime, closePrice});
+                    }
+
+                    // Insert the data into the SQLite database
+                    if (!dataToInsert.empty()) {
+                        insertStockData(ticker, dataToInsert);
                     }
 
                     std::cout << "Data parsed successfully: \n";

@@ -4,7 +4,7 @@ find_package(CURL REQUIRED)
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
 
 # Define the test executable for StockScannerTests
-add_executable(StockScannerTests StockScannerTests.cpp ../src/functions.cpp)
+add_executable(StockScannerTests StockScannerTests.cpp ../src/functions.cpp ../src/database_utils.cpp)
 target_include_directories(StockScannerTests PRIVATE ../include)
 
 # Link GTest targets, CURL, and SQLite

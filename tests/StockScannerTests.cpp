@@ -3,6 +3,7 @@
 #include <vector>
 #include <deque>
 #include <sqlite3.h>
+#include "../src/database_utils.h"
 
 using namespace StockScanner;
 
@@ -155,43 +156,57 @@ TEST(IntegrationTests, TestModifiedThresholdAndMomentumIntegration) {
     EXPECT_FALSE(checkThreshold(prices, threshold)) << "Price movement should not exceed a modified threshold of 50%.";
 }
 
-// SQLite setup and basic database operations test
-TEST(SQLiteTests, TestSQLiteConnection) {
-    sqlite3* db;
-    char* errMsg = 0;
-    int rc;
+// Test inserting multiple records for a ticker
+TEST(SQLiteTests, TestInsertMultipleRecords) {
+    initializeDatabase();
+    std::vector<std::pair<std::string, double>> data = {
+        {"2024-11-01 09:30:00", 100.5},
+        {"2024-11-01 10:00:00", 101.2},
+        {"2024-11-01 10:30:00", 102.3}
+    };
+    ASSERT_TRUE(insertStockData("TEST", data)) << "Failed to insert multiple records.";
 
-    // Open a database connection
-    rc = sqlite3_open("test.db", &db);
-    ASSERT_EQ(rc, SQLITE_OK) << "Failed to open the SQLite database: " << sqlite3_errmsg(db);
+    std::vector<double> prices = getStockDataFromDatabase("TEST");
+    ASSERT_EQ(prices.size(), 3) << "Expected 3 records for ticker TEST.";
+    EXPECT_DOUBLE_EQ(prices[0], 100.5);
+    EXPECT_DOUBLE_EQ(prices[1], 101.2);
+    EXPECT_DOUBLE_EQ(prices[2], 102.3);
 
-    // Create a simple table
-    const char* sql = "CREATE TABLE IF NOT EXISTS test_table("
-                      "ID INT PRIMARY KEY NOT NULL,"
-                      "NAME TEXT NOT NULL);";
+    closeDatabase();
+    std::remove("stock_data.db");
+}
 
-    rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
-    ASSERT_EQ(rc, SQLITE_OK) << "Failed to create table: " << (errMsg ? errMsg : "Unknown error");
+// Test duplicate insertion prevention
+TEST(SQLiteTests, TestDuplicateInsertion) {
+    initializeDatabase();
+    std::vector<std::pair<std::string, double>> data = {
+        {"2024-11-01 09:30:00", 100.5}
+    };
+    ASSERT_TRUE(insertStockData("TEST", data)) << "Initial insertion failed.";
+    ASSERT_TRUE(insertStockData("TEST", data)) << "Duplicate insertion should be ignored.";
 
-    // Insert a record
-    sql = "INSERT INTO test_table (ID, NAME) VALUES (1, 'TestName');";
-    rc = sqlite3_exec(db, sql, 0, 0, &errMsg);
-    ASSERT_EQ(rc, SQLITE_OK) << "Failed to insert record: " << (errMsg ? errMsg : "Unknown error");
+    std::vector<double> prices = getStockDataFromDatabase("TEST");
+    ASSERT_EQ(prices.size(), 1) << "Duplicate insertion should not add records.";
 
-    // Retrieve the data to verify insertion
-    const char* query = "SELECT * FROM test_table WHERE ID = 1;";
-    sqlite3_stmt* stmt;
+    closeDatabase();
+    std::remove("stock_data.db");
+}
 
-    rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
-    ASSERT_EQ(rc, SQLITE_OK) << "Failed to prepare select statement: " << sqlite3_errmsg(db);
+// Test retrieving data from an empty database
+TEST(SQLiteTests, TestRetrieveFromEmptyDatabase) {
+    initializeDatabase();
 
-    rc = sqlite3_step(stmt);
-    ASSERT_EQ(rc, SQLITE_ROW) << "No rows returned or step failed.";
+    std::vector<double> prices = getStockDataFromDatabase("TEST");
+    ASSERT_TRUE(prices.empty()) << "Expected no data for ticker TEST.";
 
-    ASSERT_EQ(sqlite3_column_int(stmt, 0), 1) << "Unexpected ID value retrieved.";
-    ASSERT_STREQ(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)), "TestName") << "Unexpected NAME value retrieved.";
+    closeDatabase();
+    std::remove("stock_data.db");
+}
 
-    // Clean up
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
+// Test handling uninitialized database
+TEST(SQLiteTests, TestUninitializedDatabase) {
+    // Directly test the functions without initializing the database
+    ASSERT_FALSE(insertStockData("TEST", {{"2024-11-01 09:30:00", 100.5}})) << "Insertion should fail when database is uninitialized.";
+    ASSERT_FALSE(checkStockDataExists("TEST")) << "Check should fail when database is uninitialized.";
+    ASSERT_TRUE(getStockDataFromDatabase("TEST").empty()) << "Retrieval should return empty when database is uninitialized.";
 }

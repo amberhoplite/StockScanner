@@ -1,17 +1,26 @@
 #include <iostream>
 #include <vector>
 #include "functions.h"
+#include "database_utils.h"
 
 int main() {
     int choice;
     std::vector<double> stockPrices;
+    std::string timeframe = "daily";  // Default timeframe
     double threshold = 5.0; // Default threshold percentage
     size_t windowSize = 3;  // Default sliding window size
 
+    // Initialize the Database to store stock prices
+    if (!StockScanner::initializeDatabase()) {
+        std::cerr << "Failed to initialize the database. Exiting.\n";
+        return 1;
+    }
 
     // Main program loop for showing the menu and processing user input
     while (true) {
+
         StockScanner::showMenu(threshold, windowSize);
+
         if (!(std::cin >> choice)) {
         std::cout << "Invalid input. Please enter a number.\n";
         std::cin.clear(); // Clear the error flag
@@ -24,7 +33,7 @@ int main() {
             std::cin >> ticker;
 
             // Load stock data for the given ticker
-            stockPrices = StockScanner::loadStockData(ticker);
+            stockPrices = StockScanner::loadStockData(ticker, timeframe);
 
             // Check if data was loaded successfully
             if (!stockPrices.empty()) {
@@ -95,12 +104,21 @@ int main() {
                 }
             }
         } else if (choice == 8) {
+            std::cout << "Enter timeframe (options: 5min, 15min, daily, hourly): ";
+            std::cin >> timeframe;
+            if (StockScanner::timeframeMap.find(timeframe) == StockScanner::timeframeMap.end()) {
+                std::cout << "Invalid timeframe. Setting to default ('daily').\n";
+                timeframe = "daily";  // Set to default if input is not valid
+            }
+        } else if (choice == 9) {
             std::cout << "Exiting program.\n";
             break;
         } else {
             std::cout << "Invalid choice. Please try again.\n";
         }
     }
+
+    StockScanner::closeDatabase(); // Clean up before exiting
 
     return 0;
 }
