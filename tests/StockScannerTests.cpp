@@ -280,3 +280,24 @@ TEST(SortingTests, HeapSortEdgeCases) {
     heapSort(duplicateData);
     EXPECT_TRUE(isSorted(duplicateData)); // Should handle duplicates
 }
+
+// Counting Sort Tests
+TEST(SortingTests, CountingSortCorrectness) {
+    std::vector<double> data = {5.0, 3.0, 4.0, 1.0, 2.0};
+    countingSort(data);
+    EXPECT_TRUE(isSorted(data));
+}
+
+TEST(SortingTests, CountingSortEdgeCases) {
+    std::vector<double> emptyData;
+    countingSort(emptyData);
+    EXPECT_TRUE(isSorted(emptyData)); // Should handle empty vector
+
+    std::vector<double> singleElementData = {42.0};
+    countingSort(singleElementData);
+    EXPECT_TRUE(isSorted(singleElementData)); // Should handle single element
+
+    std::vector<double> duplicateData = {3.0, 1.0, 2.0, 1.0, 2.0};
+    countingSort(duplicateData);
+    EXPECT_TRUE(isSorted(duplicateData)); // Should handle duplicates
+}

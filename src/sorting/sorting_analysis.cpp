@@ -5,6 +5,8 @@
 #include <random>
 #include <vector>
 #include <iomanip> 
+#include <cmath>
+#include <fstream>
 
 void selectionSort(std::vector<double>& data) {
     size_t n = data.size();
@@ -109,8 +111,43 @@ void heapSort(std::vector<double>& data) {
     }
 }
 
+void countingSort(std::vector<double>& data) {
+    if (data.empty()) return; // Handle empty vector
 
-void measureSortingPerformance(const std::vector<double>& data, SortFunction sortFunction, const std::string& algorithmName, size_t dataSize, const std::string& timeUnit, double conversionFactor) {
+    // Find the range of the input data
+    double minValue = *std::min_element(data.begin(), data.end());
+    double maxValue = *std::max_element(data.begin(), data.end());
+
+    // Scale data to integers if necessary (for future price integration)
+    int scaleFactor = 100; // Multiplier for floating-point data to maintain precision
+    std::vector<int> scaledData(data.size());
+    for (size_t i = 0; i < data.size(); ++i) {
+        scaledData[i] = static_cast<int>(std::floor((data[i] - minValue) * scaleFactor));
+    }
+
+    // Determine the range of scaled integers
+    int scaledRange = static_cast<int>((maxValue - minValue) * scaleFactor) + 1;
+
+    // Create a count array and initialize to 0
+    std::vector<int> count(scaledRange, 0);
+
+    // Count occurrences of each scaled integer
+    for (int value : scaledData) {
+        count[value]++;
+    }
+
+    // Overwrite the original data with sorted values
+    size_t index = 0;
+    for (int i = 0; i < scaledRange; ++i) {
+        while (count[i] > 0) {
+            data[index++] = minValue + static_cast<double>(i) / scaleFactor;
+            count[i]--;
+        }
+    }
+}
+
+void measureSortingPerformance(const std::vector<double>& data, SortFunction sortFunction, const std::string& algorithmName, size_t dataSize, const std::string& timeUnit, double conversionFactor,std::ofstream& outFile) {
+
     std::vector<double> dataCopy = data;
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -126,9 +163,23 @@ void measureSortingPerformance(const std::vector<double>& data, SortFunction sor
               << " | " << std::setw(15) << algorithmName
               << " | Time Taken: " << std::fixed << std::setprecision(3)
               << std::setw(10) << displayTime << " " << timeUnit << std::endl;
+
+    // Write to CSV
+    if (outFile.is_open()) {
+        outFile << dataSize << "," << algorithmName << "," << displayTime << "\n";
+    }
 }
 
 void runSortingAnalysis() {
+    std::ofstream outFile("sorting_analysis_results.csv");
+
+    // Write the CSV header
+    if (outFile.is_open()) {
+        outFile << "Data Size,Algorithm,Time Taken (microseconds)\n";
+    } else {
+        std::cerr << "Failed to open CSV file for writing. Results will not be saved.\n";
+    }
+    
     std::vector<size_t> dataSizes = {100, 1000, 10000, 100000};
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -139,33 +190,23 @@ void runSortingAnalysis() {
         std::vector<double> data(size);
         std::generate(data.begin(), data.end(), [&]() { return dis(gen); });
 
-        // Determine the time unit to use based on the data size
-        std::string timeUnit;
-        double conversionFactor; // Factor to convert seconds to the desired unit
-
-        auto start = std::chrono::high_resolution_clock::now();
-        selectionSort(data);
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed = end - start;
-
-        if (elapsed.count() < 0.001) {
-            timeUnit = "microseconds";
-            conversionFactor = 1e6;  // Convert seconds to microseconds
-        } else if (elapsed.count() < 1.0) {
-            timeUnit = "milliseconds";
-            conversionFactor = 1e3;  // Convert seconds to milliseconds
-        } else {
-            timeUnit = "seconds";
-            conversionFactor = 1.0;  // Keep as seconds
-        }
+        // Use milliseconds as timeUnit
+        std::string timeUnit = "milliseconds";
+        double conversionFactor = 1e3; // Convert seconds to milliseconds
 
         // Print a header to differentiate between different data sizes
         std::cout << "\nAnalyzing Sorting Performance for Data Size: " << size << "\n" << std::string(60, '-') << "\n";
 
         // Measure performance for each algorithm using consistent units for the current data size
-        measureSortingPerformance(data, selectionSort, "SelectionSort", size, timeUnit, conversionFactor);
-        measureSortingPerformance(data, [](std::vector<double>& d) { mergeSort(d, 0, d.size() - 1); }, "MergeSort", size, timeUnit, conversionFactor);
-        measureSortingPerformance(data, heapSort, "HeapSort", size, timeUnit, conversionFactor);
-        measureSortingPerformance(data, [](std::vector<double>& d) { std::sort(d.begin(), d.end()); }, "std::sort", size, timeUnit, conversionFactor);
+        measureSortingPerformance(data, selectionSort, "SelectionSort", size, timeUnit, conversionFactor, outFile);
+        measureSortingPerformance(data, [](std::vector<double>& d) { mergeSort(d, 0, d.size() - 1); }, "MergeSort", size, timeUnit, conversionFactor, outFile);
+        measureSortingPerformance(data, heapSort, "HeapSort", size, timeUnit, conversionFactor, outFile);
+        measureSortingPerformance(data, countingSort, "CountingSort", size, timeUnit, conversionFactor, outFile);
+        measureSortingPerformance(data, [](std::vector<double>& d) { std::sort(d.begin(), d.end()); }, "std::sort", size, timeUnit, conversionFactor, outFile);
+    }
+
+    if (outFile.is_open()) {
+        outFile.close();
+        std::cout << "\nSorting analysis results saved to 'sorting_analysis_results.csv'.\n";
     }
 }

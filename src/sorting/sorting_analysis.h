@@ -9,6 +9,7 @@ using SortFunction = void(*)(std::vector<double>&);
 void selectionSort(std::vector<double>& data);
 void mergeSort(std::vector<double>& arr, size_t left, size_t right);
 void heapSort(std::vector<double>& data);
+void countingSort(std::vector<double>& data);
 
 void measureSortingPerformance(const std::vector<double>& data, SortFunction sortFunction, const std::string& algorithmName);
 void runSortingAnalysis();
