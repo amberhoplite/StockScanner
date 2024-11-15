@@ -6,7 +6,7 @@
 #include <numeric>
 #include <curl/curl.h>
 #include "functions.h"
-#include "database_utils.h"
+#include "../database/database_utils.h"
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -26,21 +26,6 @@ namespace StockScanner {
     size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
         ((std::string*)userp)->append((char*)contents, size * nmemb);
         return size * nmemb;
-    }
-
-    // Displays the menu options
-    void showMenu(double threshold, size_t windowSize) {
-        std::cout << "Menu:\n";
-        std::cout << "1. Get Stock Ticker Data\n";
-        std::cout << "2. Calculate Average Stock Price\n";
-        std::cout << "3. Check Threshold\n";
-        std::cout << "4. Modify Threshold Setting (Current: " << threshold << "%)\n";
-        std::cout << "5. Apply Sliding Window\n";
-        std::cout << "6. Modify Sliding Window Size (Current: " << windowSize << ")\n";
-        std::cout << "7. Detect Momentum\n";
-        std::cout << "8. Change timeframe\n";
-        std::cout << "9. Exit\n";
-        std::cout << "Select an option: ";
     }
 
     // Reads the API key from a config file to avoid hardcoding sensitive API keys

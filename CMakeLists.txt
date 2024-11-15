@@ -16,7 +16,13 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.c
 include_directories(include)
 
 # Add the main executable
-add_executable(StockScanner src/main.cpp src/functions.cpp src/database_utils.cpp)
+add_executable(StockScanner 
+    src/core/main.cpp
+    src/core/functions.cpp
+    src/database/database_utils.cpp
+    src/menu/menu_actions.cpp
+    src/sorting/sorting_analysis.cpp
+)
 
 # Link libraries for CURL
 find_package(CURL REQUIRED)

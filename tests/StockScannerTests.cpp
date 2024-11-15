@@ -1,9 +1,11 @@
 #include <gtest/gtest.h>
-#include "../src/functions.h"
+#include "../src/core/functions.h"
 #include <vector>
 #include <deque>
 #include <sqlite3.h>
-#include "../src/database_utils.h"
+#include "../src/database/database_utils.h"
+#include "../src/sorting/sorting_analysis.h"
+#include <algorithm>
 
 using namespace StockScanner;
 
@@ -209,4 +211,72 @@ TEST(SQLiteTests, TestUninitializedDatabase) {
     ASSERT_FALSE(insertStockData("TEST", {{"2024-11-01 09:30:00", 100.5}})) << "Insertion should fail when database is uninitialized.";
     ASSERT_FALSE(checkStockDataExists("TEST")) << "Check should fail when database is uninitialized.";
     ASSERT_TRUE(getStockDataFromDatabase("TEST").empty()) << "Retrieval should return empty when database is uninitialized.";
+}
+
+// Helper function to verify if a vector is sorted
+bool isSorted(const std::vector<double>& data) {
+    return std::is_sorted(data.begin(), data.end());
+}
+
+// Selection Sort Tests
+TEST(SortingTests, SelectionSortCorrectness) {
+    std::vector<double> data = {5.0, 3.0, 4.0, 1.0, 2.0};
+    selectionSort(data);
+    EXPECT_TRUE(isSorted(data));
+}
+
+TEST(SortingTests, SelectionSortEdgeCases) {
+    std::vector<double> emptyData;
+    selectionSort(emptyData);
+    EXPECT_TRUE(isSorted(emptyData)); // Should handle empty vector
+
+    std::vector<double> singleElementData = {42.0};
+    selectionSort(singleElementData);
+    EXPECT_TRUE(isSorted(singleElementData)); // Should handle single element
+
+    std::vector<double> duplicateData = {3.0, 1.0, 2.0, 1.0, 2.0};
+    selectionSort(duplicateData);
+    EXPECT_TRUE(isSorted(duplicateData)); // Should handle duplicates
+}
+
+// Merge Sort Tests
+TEST(SortingTests, MergeSortCorrectness) {
+    std::vector<double> data = {5.0, 3.0, 4.0, 1.0, 2.0};
+    mergeSort(data, 0, data.size() - 1);
+    EXPECT_TRUE(isSorted(data));
+}
+
+TEST(SortingTests, MergeSortEdgeCases) {
+    std::vector<double> emptyData;
+    mergeSort(emptyData, 0, emptyData.size() - 1);
+    EXPECT_TRUE(isSorted(emptyData)); // Should handle empty vector
+
+    std::vector<double> singleElementData = {42.0};
+    mergeSort(singleElementData, 0, singleElementData.size() - 1);
+    EXPECT_TRUE(isSorted(singleElementData)); // Should handle single element
+
+    std::vector<double> duplicateData = {3.0, 1.0, 2.0, 1.0, 2.0};
+    mergeSort(duplicateData, 0, duplicateData.size() - 1);
+    EXPECT_TRUE(isSorted(duplicateData)); // Should handle duplicates
+}
+
+// Heap Sort Tests
+TEST(SortingTests, HeapSortCorrectness) {
+    std::vector<double> data = {5.0, 3.0, 4.0, 1.0, 2.0};
+    heapSort(data);
+    EXPECT_TRUE(isSorted(data));
+}
+
+TEST(SortingTests, HeapSortEdgeCases) {
+    std::vector<double> emptyData;
+    heapSort(emptyData);
+    EXPECT_TRUE(isSorted(emptyData)); // Should handle empty vector
+
+    std::vector<double> singleElementData = {42.0};
+    heapSort(singleElementData);
+    EXPECT_TRUE(isSorted(singleElementData)); // Should handle single element
+
+    std::vector<double> duplicateData = {3.0, 1.0, 2.0, 1.0, 2.0};
+    heapSort(duplicateData);
+    EXPECT_TRUE(isSorted(duplicateData)); // Should handle duplicates
 }
