@@ -190,9 +190,9 @@ void runSortingAnalysis() {
         std::vector<double> data(size);
         std::generate(data.begin(), data.end(), [&]() { return dis(gen); });
 
-        // Use milliseconds as timeUnit
-        std::string timeUnit = "milliseconds";
-        double conversionFactor = 1e3; // Convert seconds to milliseconds
+        // Use microseconds as timeUnit
+        std::string timeUnit = "microseconds";
+        double conversionFactor = 1e6; // Convert seconds to microseconds
 
         // Print a header to differentiate between different data sizes
         std::cout << "\nAnalyzing Sorting Performance for Data Size: " << size << "\n" << std::string(60, '-') << "\n";
