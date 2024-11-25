@@ -9,8 +9,11 @@ add_executable(StockScannerTests
     ../src/database/database_utils.cpp
     ../src/menu/menu_actions.cpp
     ../src/sorting/sorting_analysis.cpp
+    ../src/linked_lists/stack_queue.cpp
     StockScannerTests.cpp
+    StackQueueTests.cpp
 )
+# Include directories for the project
 target_include_directories(StockScannerTests PRIVATE ../include)
 
 # Link GTest targets, CURL, and SQLite
