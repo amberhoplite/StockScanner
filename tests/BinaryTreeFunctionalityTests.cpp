@@ -103,6 +103,10 @@ TEST(BinaryTreeFunctionalityTests, RemoveNodeWithTwoChildren) {
 TEST(BinaryTreeEdgeCaseTests, EmptyTreeOperations) {
     BinaryTree bst;
 
+    // Attempt to remove a node from an empty tree
+    EXPECT_NO_THROW(bst.Remove(10)); // Should not throw an error
+    EXPECT_FALSE(bst.Find(10));      // Ensure the tree is still empty
+
     EXPECT_THROW(bst.Maximum(), std::out_of_range);
     EXPECT_FALSE(bst.Find(10));
 
