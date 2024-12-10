@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
 #include "../src/core/functions.h"
+#include "../src/database/database_utils.h"
+#include "../src/sorting/sorting_analysis.h"
+#include "test_helpers.h"
 #include <vector>
 #include <deque>
 #include <sqlite3.h>
-#include "../src/database/database_utils.h"
-#include "../src/sorting/sorting_analysis.h"
 #include <algorithm>
 
 using namespace StockScanner;
@@ -211,11 +212,6 @@ TEST(SQLiteTests, TestUninitializedDatabase) {
     ASSERT_FALSE(insertStockData("TEST", {{"2024-11-01 09:30:00", 100.5}})) << "Insertion should fail when database is uninitialized.";
     ASSERT_FALSE(checkStockDataExists("TEST")) << "Check should fail when database is uninitialized.";
     ASSERT_TRUE(getStockDataFromDatabase("TEST").empty()) << "Retrieval should return empty when database is uninitialized.";
-}
-
-// Helper function to verify if a vector is sorted
-bool isSorted(const std::vector<double>& data) {
-    return std::is_sorted(data.begin(), data.end());
 }
 
 // Selection Sort Tests
