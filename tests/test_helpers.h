@@ -7,6 +7,7 @@
 #include <stack>
 #include <queue>
 #include <deque>
+#include <unordered_map>
 
 // Generates random integers
 std::vector<int> generateRandomNumbers(size_t count);
@@ -73,3 +74,49 @@ std::pair<std::vector<double>, std::vector<double>> measureSTLPerformance(const 
 
     return {insertTimes, deleteTimes};
 }
+
+// Generates unique random key-value pairs
+std::vector<std::pair<int, std::string>> generateUniqueRandomKeyValuePairs(size_t count);
+
+// Prints a performance table for hash table operations
+void printHashTablePerformanceTable(const std::vector<double>& insertTimes, const std::vector<double>& retrieveTimes,
+                                    const std::vector<double>& removeTimes, const std::string& label);
+
+// Template function to measure performance of hash table operations
+template <typename HashTable>
+std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> measureHashTablePerformance(
+    HashTable& hashTable, const std::vector<std::pair<int, std::string>>& data) {
+    std::vector<double> insertTimes, retrieveTimes, removeTimes;
+
+    for (size_t count : {100, 1000, 10000}) {
+        // Measure insertion time
+        auto start = std::chrono::high_resolution_clock::now();
+        for (size_t i = 0; i < count; ++i) {
+            hashTable.insert(data[i].first, data[i].second);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        insertTimes.push_back(std::chrono::duration<double, std::milli>(end - start).count());
+
+        // Measure retrieval time
+        start = std::chrono::high_resolution_clock::now();
+        for (size_t i = 0; i < count; ++i) {
+            hashTable.retrieve(data[i].first);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        retrieveTimes.push_back(std::chrono::duration<double, std::milli>(end - start).count());
+
+        // Measure removal time
+        start = std::chrono::high_resolution_clock::now();
+        for (size_t i = 0; i < count; ++i) {
+            hashTable.remove(data[i].first);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        removeTimes.push_back(std::chrono::duration<double, std::milli>(end - start).count());
+    }
+
+    return {insertTimes, retrieveTimes, removeTimes};
+}
+
+// Overload for std::unordered_map
+std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> measureHashTablePerformance(
+    std::unordered_map<int, std::string>& hashTable, const std::vector<std::pair<int, std::string>>& data);
