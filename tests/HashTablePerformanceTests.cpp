@@ -7,7 +7,7 @@
 // Test Phase 1: Chaining
 TEST(HashTablePerformanceTests, Phase1ChainingPerformance) {
     HashTable<int, std::string> hashTable;
-    auto data = generateUniqueRandomKeyValuePairs(10000); // Use appropriate dataset
+    auto data = generateUniqueRandomKeyValuePairs(10000);
 
     auto [insertTimes, retrieveTimes, removeTimes] = measureHashTablePerformance(hashTable, data);
 
@@ -19,7 +19,7 @@ TEST(HashTablePerformanceTests, Phase1ChainingPerformance) {
 // Test Phase 2: Open Addressing
 TEST(HashTablePerformanceTests, Phase2OpenAddressingPerformance) {
     OpenAddressingHashTable<int, std::string> hashTable;
-    auto data = generateUniqueRandomKeyValuePairs(10000); // Use appropriate dataset
+    auto data = generateUniqueRandomKeyValuePairs(10000);
 
     auto [insertTimes, retrieveTimes, removeTimes] = measureHashTablePerformance(hashTable, data);
 
@@ -31,7 +31,7 @@ TEST(HashTablePerformanceTests, Phase2OpenAddressingPerformance) {
 // Test Built-in Hash Table
 TEST(HashTablePerformanceTests, BuiltInHashTablePerformance) {
     std::unordered_map<int, std::string> hashTable;
-    auto data = generateUniqueRandomKeyValuePairs(10000); // Use appropriate dataset
+    auto data = generateUniqueRandomKeyValuePairs(10000); 
 
     auto [insertTimes, retrieveTimes, removeTimes] = measureHashTablePerformance(hashTable, data);
 
